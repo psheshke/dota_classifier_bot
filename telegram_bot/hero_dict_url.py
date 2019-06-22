@@ -1,0 +1,16 @@
+url_dict = {
+    'Abaddon': 'abaddon',
+    'Alchemist': 'alchemist',
+    'Ancient Apparition': 'ancient-apparition',
+    'Anti-Mage': 'anti-mage',
+    'Arc Warden': 'arc-warden',
+    'Axe': 'axe',
+    'Bane': 'bane',
+    'Batrider': 'batrider',
+    'Beastmaster': 'beastmaster',
+    'Bloodseeker': 'bloodseeker',
+    'Bounty Hunter': 'bounty-hunter',
+    'Brewmaster': 'brewmaster',
+    'Bristleback': 'bristleback',
+    'Broodmother': 'broodmother',
+}

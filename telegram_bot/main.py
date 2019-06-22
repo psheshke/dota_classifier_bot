@@ -2,12 +2,15 @@ from model import ClassPredictor
 from telegram import Bot, Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram_token import token, TG_API_URL, proxy
+from dota2_wiki_parser import parser
 import torch
 from config import reply_texts
 import numpy as np
 from PIL import Image
 from io import BytesIO
 import time
+import urllib
+import requests
 
 model = ClassPredictor()
 
@@ -21,9 +24,22 @@ def send_prediction_on_photo(update, context):
     image_file = image_info.get_file()
     image_stream = BytesIO()
     image_file.download(out=image_stream)
+    print(image_stream)
     class_ = model.predict(image_stream)
+    print('I predict - ', class_)
+    result, img_url, audio_url = parser(class_)
     # теперь отправим результат
-    update.message.reply_text(str(class_))
+
+    text = 'Кажется это - '+ str(class_)+ '\n' \
+            'а вот, что я о нем знаю: \n \n' + result
+
+    text = "[​​​​​​​​​​​]({}) {}".format(img_url, text)
+
+    sound = urllib.request.urlopen(audio_url)
+
+    update.message.reply_text(text=text, parse_mode='Markdown')
+    update.message.reply_audio(audio=sound)
+
     print("Sent Answer to user, predicted: {}".format(class_))
     end_time = time.process_time()
     print('Duration of prediction: {}'.format(end_time - start_time))
@@ -45,7 +61,33 @@ def do_echo(update, context):
     start_time = time.process_time()
 
     text = update.message.text
-    update.message.reply_text("ты сказал: \n"+text)
+
+    if 'http' in text:
+
+        response = requests.get(requests.get([i for i in text.split(' ') if 'http' in i][0]))
+
+        img = BytesIO(response.content)
+
+
+        class_ = model.predict(img)
+
+        result, img_url, audio_url = parser(class_)
+
+        text = 'Кажется это - ' + str(class_) + '\n' \
+               'а вот, что я о нем знаю: \n \n' + result
+
+        text = "[​​​​​​​​​​​]({}) {}".format(img_url, text)
+
+        sound = urllib.request.urlopen(audio_url)
+
+        update.message.reply_text(text=text, parse_mode='Markdown')
+        update.message.reply_audio(audio=sound)
+
+        print("Sent Answer to user, predicted: {}".format(class_))
+
+    else:
+
+        update.message.reply_text("ты сказал: \n")
 
     end_time = time.process_time()
     print('Duration: {}'.format(end_time - start_time))
