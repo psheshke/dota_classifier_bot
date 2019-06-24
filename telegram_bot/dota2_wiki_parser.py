@@ -39,6 +39,10 @@ def parser(hero):
 
     d2ru = 'https://dota2.ru/heroes/' + url_dict[hero]
 
+    dotabuffurl = 'https://ru.dotabuff.com/heroes/' + url_dict[hero]
+
+    youtubeguide = 'https://www.youtube.com/results?search_query=dota+2+guide+'+hero.replace(' ', '+')
+
     session = requests.Session()
     request = session.get(d2ru, )
 
@@ -48,4 +52,4 @@ def parser(hero):
 
         result = soup.find_all('div', attrs={'class': 'bio'})[0].find_all('p', )[0].getText()
 
-    return result, img_url, audio_url
+    return result, img_url, audio_url, dotabuffurl, youtubeguide

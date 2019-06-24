@@ -1,6 +1,7 @@
 from model import ClassPredictor
 from telegram import Bot, Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 from telegram_token import token, TG_API_URL, proxy
 from dota2_wiki_parser import parser
 import torch
@@ -13,36 +14,6 @@ import urllib
 import requests
 
 model = ClassPredictor()
-
-def send_prediction_on_photo(update, context):
-    start_time = time.process_time()
-    chat_id = update.message.chat_id
-    print("Got image from {}".format(chat_id))
-
-    # получаем информацию о картинке
-    image_info = update.message.photo[-1]
-    image_file = image_info.get_file()
-    image_stream = BytesIO()
-    image_file.download(out=image_stream)
-    print(image_stream)
-    class_ = model.predict(image_stream)
-    print('I predict - ', class_)
-    result, img_url, audio_url = parser(class_)
-    # теперь отправим результат
-
-    text = 'Кажется это - '+ str(class_)+ '\n' \
-            'а вот, что я о нем знаю: \n \n' + result
-
-    text = "[​​​​​​​​​​​]({}) {}".format(img_url, text)
-
-    sound = urllib.request.urlopen(audio_url)
-
-    update.message.reply_text(text=text, parse_mode='Markdown')
-    update.message.reply_audio(audio=sound)
-
-    print("Sent Answer to user, predicted: {}".format(class_))
-    end_time = time.process_time()
-    print('Duration of prediction: {}'.format(end_time - start_time))
 
 def do_start(update, context):
 
@@ -58,6 +29,7 @@ def do_start(update, context):
     update.message.reply_text(text)
 
 def do_echo(update, context):
+
     start_time = time.process_time()
 
     text = update.message.text
@@ -71,7 +43,12 @@ def do_echo(update, context):
 
         class_ = model.predict(img)
 
-        result, img_url, audio_url = parser(class_)
+        titles = {
+            'callback_button_1': 'Guide ' + str(class_),
+            'callback_button_2': 'Dotabuff ' + str(class_)
+        }
+
+        result, img_url, audio_url, dotabuffurl, youtubeguide = parser(class_)
 
         text = 'Кажется это - ' + str(class_) + '\n' \
                'а вот, что я о нем знаю: \n \n' + result
@@ -83,14 +60,72 @@ def do_echo(update, context):
         update.message.reply_text(text=text, parse_mode='Markdown')
         update.message.reply_audio(audio=sound)
 
+        titles = {
+            callback_button_1: 'Guide {}'.format(class_),
+            callback_button_2: 'Dotabuff {}'.format(class_)
+        }
+
+        update.message.reply_text(text='Может посмотрим видео гайд или ' \
+                                       'профиль героя на добабаффе?', reply_markup=get_keyboard(titles, dotabuffurl,
+                                                                                                youtubeguide))
+
         print("Sent Answer to user, predicted: {}".format(class_))
 
     else:
 
-        update.message.reply_text("ты сказал: \n")
+        update.message.reply_text("Если ты отправишь мне картинку \n" \
+                                  "или ссылку на нее, то я скажу, что это за герой")
 
     end_time = time.process_time()
     print('Duration: {}'.format(end_time - start_time))
+
+def send_prediction_on_photo(update, context):
+    start_time = time.process_time()
+    chat_id = update.message.chat_id
+    print("Got image from {}".format(chat_id))
+
+    # получаем информацию о картинке
+    image_info = update.message.photo[-1]
+    image_file = image_info.get_file()
+    image_stream = BytesIO()
+    image_file.download(out=image_stream)
+    print(image_stream)
+    class_ = model.predict(image_stream)
+    print('I predict - ', class_)
+    result, img_url, audio_url, dotabuffurl, youtubeguide = parser(class_)
+    # теперь отправим результат
+
+    text = 'Кажется это - '+ str(class_)+ '\n' \
+            'а вот, что я о нем знаю: \n \n' + result
+
+    text = "[​​​​​​​​​​​]({}) {}".format(img_url, text)
+
+    sound = urllib.request.urlopen(audio_url)
+
+    update.message.reply_text(text=text, parse_mode='Markdown')
+    update.message.reply_audio(audio=sound)
+
+    titles = {
+        'callback_button_1': 'Guide ' + str(class_),
+        'callback_button_2': 'Dotabuff ' + str(class_)
+    }
+
+    update.message.reply_text(text='Может посмотрим видео гайд или ' \
+                                   'профиль героя на добабаффе?', reply_markup=get_keyboard(titles, dotabuffurl,
+                                                                                            youtubeguide))
+
+    print("Sent Answer to user, predicted: {}".format(class_))
+    end_time = time.process_time()
+    print('Duration of prediction: {}'.format(end_time - start_time))
+
+def get_keyboard(titles, dotabuffurl, youtubeguide):
+
+    keyboard = [
+        InlineKeyboardButton(text='Giude', callback_data=titles['callback_button_1'], url =youtubeguide),
+        InlineKeyboardButton(text='Dotabuff', callback_data=titles['callback_button_2'], url =dotabuffurl),
+    ]
+
+    return InlineKeyboardMarkup([keyboard])
 
 def main():
 
