@@ -34,7 +34,7 @@ def do_echo(update, context):
 
     text = update.message.text
 
-    if 'http' in text:
+    if ('http' in text and ('png' in text or 'jpg' in text)):
 
         update.message.reply_text(text='Хммм....дай подумать, сейчас вспомню..', )
 
@@ -73,8 +73,8 @@ def do_echo(update, context):
 
     else:
 
-        update.message.reply_text("Если ты отправишь мне картинку \n" \
-                                  "или ссылку на нее, то я скажу, что это за герой")
+        update.message.reply_text("Если ты отправишь мне картинку файлом\n" \
+                                  "или прямую ссылку на нее, то я скажу, что это за герой")
 
     end_time = time.process_time()
     print('Duration: {}'.format(end_time - start_time))
