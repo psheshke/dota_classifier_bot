@@ -36,17 +36,17 @@ def do_echo(update, context):
 
     if 'http' in text:
 
-        response = requests.get(requests.get([i for i in text.split(' ') if 'http' in i][0]))
+        update.message.reply_text(text='Хммм....дай подумать, сейчас вспомню..', )
 
-        img = BytesIO(response.content)
+        response = requests.get([i for i in text.split(' ') if 'http' in i][0])
 
+        img = BytesIO()
+
+        Image.open(BytesIO(response.content)).convert('RGB').save(img, 'PNG')
+
+        update.message.reply_text(text='Щас поглядимс..', )
 
         class_ = model.predict(img)
-
-        titles = {
-            'callback_button_1': 'Guide ' + str(class_),
-            'callback_button_2': 'Dotabuff ' + str(class_)
-        }
 
         result, img_url, audio_url, dotabuffurl, youtubeguide = parser(class_)
 
@@ -61,8 +61,8 @@ def do_echo(update, context):
         update.message.reply_audio(audio=sound)
 
         titles = {
-            callback_button_1: 'Guide {}'.format(class_),
-            callback_button_2: 'Dotabuff {}'.format(class_)
+            'callback_button_1': 'Guide ' + str(class_),
+            'callback_button_2': 'Dotabuff ' + str(class_)
         }
 
         update.message.reply_text(text='Может посмотрим видео гайд или ' \
@@ -88,7 +88,13 @@ def send_prediction_on_photo(update, context):
     image_info = update.message.photo[-1]
     image_file = image_info.get_file()
     image_stream = BytesIO()
+
+    update.message.reply_text(text='Хммм....дай подумать, сейчас вспомню..', )
+
     image_file.download(out=image_stream)
+
+    update.message.reply_text(text='Щас поглядимс..', )
+
     print(image_stream)
     class_ = model.predict(image_stream)
     print('I predict - ', class_)
