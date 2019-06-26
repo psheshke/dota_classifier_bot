@@ -14,7 +14,7 @@ class ClassPredictor:
 
     def __init__(self):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = load_learner("../model/", 'densenet121.pkl')
+        self.model = load_learner("../model/", 'densenet_121_28classes.pkl')
         self.to_tensor = transforms.ToTensor()
 
     def predict(self, img_stream):

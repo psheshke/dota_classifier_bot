@@ -13,4 +13,18 @@ url_dict = {
     'Brewmaster': 'brewmaster',
     'Bristleback': 'bristleback',
     'Broodmother': 'broodmother',
+    'Centaur Warrunner': 'centaur-warrunner',
+    'Chaos Knight': 'chaos-knight',
+    'Chen': 'chen',
+    'Clinkz': 'clinkz',
+    'Clockwerk': 'clockwerk',
+    'Crystal Maiden': 'crystal-maiden',
+    'Dark Seer': 'dark-seer',
+    'Dark Willow': 'dark-willow',
+    'Dazzle': 'dazzle',
+    'Death Prophet': 'death-prophet',
+    'Disruptor': 'disruptor',
+    'Doom': 'doom',
+    'Dragon Knight': 'dragon-knight',
+    'Drow Ranger': 'drow-ranger'
 }
